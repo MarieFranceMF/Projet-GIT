@@ -17,8 +17,10 @@ ra misy ts mety -> mamorona branche  fix/sprint0/description du fix
 manao code reveiw 
 de acceptena 
 manao cherry pick ny fix ao amin ny staging ampitovina amin main
-anaty hisoty (github desktop) click droite sur branche tiana andefasana azy de manao cherry pick commit d misafidy de alefa ao amin main
-RQ: Vao vita merge ao amin ny staging ohtr de fafana ny branche 
+
+- Aona manao cherry pick ?
+anaty history (github desktop) click droite sur branche tiana andefasana azy de manao 'cherry pick commit' d misafidy de alefa ao amin main
+RQ: Vao vita merge ao amin'ny staging ohtr de fafana ny branche 
 
 
 *Asan ny dev :
@@ -31,4 +33,11 @@ Mangataka Pull request -> manao code review ny TL
 Ref vita d mergeny ny branche
 
 lundi 02 2026
-BDD: script-date: insertion de base de donnee
+BDD: script-(date): insertion de base de donnee
+
+Schema Bdd
+Client manao reservation(ref: nbr clients, date/heure, hotel)
+Vehicule(capacite, Type_carb), Parametre(vitesse moyenne (ex:20km/h), TA(Temps d Attente))
+Regroupement
+Assignation Voiture (supposena oe efa any amin aeroport dhl ny voiture rhtr)
+
