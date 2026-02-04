@@ -6,16 +6,10 @@
 -- ============================================
 
 -- Suppression des tables si elles existent (dans l'ordre des dépendances)
-DROP TABLE IF EXISTS assignation_vehicule;
-DROP TABLE IF EXISTS regroupement_reservation;
-DROP TABLE IF EXISTS regroupement;
-DROP TABLE IF EXISTS reservation;
-DROP TABLE IF EXISTS client;
-DROP TABLE IF EXISTS vol;
-DROP TABLE IF EXISTS vehicule;
-DROP TABLE IF EXISTS type_carburant;
-DROP TABLE IF EXISTS destination;
-DROP TABLE IF EXISTS parametre;
+\c postgres;
+drop database if exists gestion_transport_aeroport;
+create database gestion_transport_aeroport;
+\c gestion_transport_aeroport;
 
 -- ============================================
 -- TABLE: type_carburant
