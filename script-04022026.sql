@@ -5,7 +5,6 @@
 -- Date: 04/02/2026
 -- ============================================
 
--- Suppression des tables si elles existent (dans l'ordre des dépendances)
 \c postgres;
 drop database if exists gestion_transport_aeroport;
 create database gestion_transport_aeroport;
