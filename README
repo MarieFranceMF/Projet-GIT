@@ -1,0 +1,34 @@
+sprint 0
+Mise en route de l environnement:
+bdd relationnelle (au choix)
+back office : mapiasa frwk, misy back end sy front end => protege dhl ny am b.o 
+front office: Springboot, backend(Springboot) / frontend (spring mvc, frwk js => vue na react) => public dhl ny am f.o 
+deployena 
+
+*TL:
+preparation de la branche
+sprint (num du sprint)/(num fonctionnalite)/(titre de la feature)
+(ex: sprint 0/1/creation de la bdd)
+manao code review
+d manao merge request aveo 
+mcreer barnche stage -> staging/sprint/0 (ny dev ts mclone an io zany) ->
+deployena localement ny staging
+ra misy ts mety -> mamorona branche  fix/sprint0/description du fix
+manao code reveiw 
+de acceptena 
+manao cherry pick ny fix ao amin ny staging ampitovina amin main
+anaty hisoty (github desktop) click droite sur branche tiana andefasana azy de manao cherry pick commit d misafidy de alefa ao amin main
+RQ: Vao vita merge ao amin ny staging ohtr de fafana ny branche 
+
+
+*Asan ny dev :
+mclone branche
+vita de manao commit
+pull request-> create pr 
+
+Ra misy ts mety : d clonena le branche nofioronin TL 
+Mangataka Pull request -> manao code review ny TL 
+Ref vita d mergeny ny branche
+
+lundi 02 2026
+BDD: script-date: insertion de base de donnee
