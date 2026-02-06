@@ -1,242 +1,123 @@
--- ============================================
--- Script de création de base de données
--- Projet: Gestion et optimisation d'assignation 
---         de véhicules aéroport
--- Date: 04/02/2026
--- ============================================
+-- Schéma PostgreSQL optimisé pour la gestion clients / véhicules / réservations
+-- Inclut : normalisation, contraintes, index, fonctions d'assignation et protection contre chevauchement
 
-\c postgres;
-drop database if exists gestion_transport_aeroport;
-create database gestion_transport_aeroport;
-\c gestion_transport_aeroport;
 
--- ============================================
--- TABLE: type_carburant
--- Types de carburant disponibles pour les véhicules
--- ============================================
-CREATE TABLE type_carburant (
+-- Tables de référence (noms en français)
+CREATE TABLE IF NOT EXISTS statuts_reservation (nom TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS types_reservation (nom TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS statuts_vehicule (nom TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS statuts_affectation (nom TEXT PRIMARY KEY);
+
+-- Valeurs initiales des tables de référence
+INSERT INTO statuts_reservation(nom) VALUES ('en_attente'), ('confirmee'), ('annulee'), ('terminee') ON CONFLICT (nom) DO NOTHING;
+INSERT INTO types_reservation(nom) VALUES ('prise_aeroport'), ('depose_aeroport'), ('excursion'), ('transfert') ON CONFLICT (nom) DO NOTHING;
+INSERT INTO statuts_vehicule(nom) VALUES ('disponible'), ('attribue'), ('en_service'), ('maintenance'), ('hors_service') ON CONFLICT (nom) DO NOTHING;
+INSERT INTO statuts_affectation(nom) VALUES ('attribue'), ('demarre'), ('terminee'), ('annulee') ON CONFLICT (nom) DO NOTHING;   
+
+-- Clients
+CREATE TABLE IF NOT EXISTS clients (
     id SERIAL PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE,
-    cout_par_litre DECIMAL(10, 2) NOT NULL
-);
-
--- ============================================
--- TABLE: vehicule
--- Véhicules disponibles à l'aéroport
--- ============================================
-CREATE TABLE vehicule (
-    id SERIAL PRIMARY KEY,
-    immatriculation VARCHAR(20) NOT NULL UNIQUE,
-    marque VARCHAR(50) NOT NULL,
-    modele VARCHAR(50) NOT NULL,
-    capacite INT NOT NULL CHECK (capacite > 0),
-    id_type_carburant INT NOT NULL,
-    consommation_100km DECIMAL(5, 2) NOT NULL, -- Litres/100km
-    est_disponible BOOLEAN DEFAULT TRUE,
-    date_mise_en_service DATE,
-    FOREIGN KEY (id_type_carburant) REFERENCES type_carburant(id)
-);
-
--- ============================================
--- TABLE: destination
--- Destinations possibles (hôtels, lieux)
--- ============================================
-CREATE TABLE destination (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
+    prenom TEXT NOT NULL,
+    nom TEXT NOT NULL,
+    email TEXT UNIQUE,
+    telephone TEXT,
     adresse VARCHAR(255),
-    distance_aeroport_km DECIMAL(10, 2) NOT NULL, -- Distance depuis l'aéroport
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8)
+    cree_le TIMESTAMP DEFAULT LOCALTIMESTAMP
 );
-
--- ============================================
--- TABLE: vol
--- Informations sur les vols arrivants
--- ============================================
-CREATE TABLE vol (
-    id SERIAL PRIMARY KEY,
-    numero_vol VARCHAR(20) NOT NULL UNIQUE,
-    compagnie VARCHAR(100),
-    provenance VARCHAR(100),
-    date_heure_arrivee TIMESTAMP NOT NULL,
-    terminal VARCHAR(10)
-);
-
--- ============================================
--- TABLE: client
--- Passagers/Clients du service de transport
--- ============================================
-CREATE TABLE client (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    prenom VARCHAR(100) NOT NULL,
-    telephone VARCHAR(20),
-    email VARCHAR(100),
-    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ============================================
--- TABLE: reservation
--- Réservations de transport par les clients
--- ============================================
-CREATE TABLE reservation (
-    id SERIAL PRIMARY KEY,
-    reference VARCHAR(50) NOT NULL UNIQUE,
-    id_client INT NOT NULL,
-    id_vol INT,
-    id_destination INT NOT NULL,
-    nombre_passagers INT NOT NULL CHECK (nombre_passagers > 0),
-    nombre_bagages INT DEFAULT 0,
-    date_heure_souhaitee TIMESTAMP NOT NULL,
-    statut VARCHAR(30) DEFAULT 'EN_ATTENTE' CHECK (statut IN ('EN_ATTENTE', 'CONFIRMEE', 'ASSIGNEE', 'EN_COURS', 'TERMINEE', 'ANNULEE')),
-    commentaire TEXT,
-    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_client) REFERENCES client(id),
-    FOREIGN KEY (id_vol) REFERENCES vol(id),
-    FOREIGN KEY (id_destination) REFERENCES destination(id)
-);
-
--- ============================================
--- TABLE: regroupement
--- Regroupement de réservations pour optimisation
--- (plusieurs clients vers même destination ou proche)
--- ============================================
-CREATE TABLE regroupement (
-    id SERIAL PRIMARY KEY,
-    code_regroupement VARCHAR(50) NOT NULL UNIQUE,
-    date_heure_depart TIMESTAMP NOT NULL,
-    total_passagers INT NOT NULL DEFAULT 0,
-    statut VARCHAR(30) DEFAULT 'EN_PREPARATION' CHECK (statut IN ('EN_PREPARATION', 'PRET', 'EN_COURS', 'TERMINE')),
-    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ============================================
--- TABLE: regroupement_reservation
--- Association entre regroupements et réservations
--- ============================================
-CREATE TABLE regroupement_reservation (
-    id SERIAL PRIMARY KEY,
-    id_regroupement INT NOT NULL,
-    id_reservation INT NOT NULL,
-    ordre_depot INT, -- Ordre de dépôt des passagers
-    FOREIGN KEY (id_regroupement) REFERENCES regroupement(id),
-    FOREIGN KEY (id_reservation) REFERENCES reservation(id),
-    UNIQUE (id_regroupement, id_reservation)
-);
-
--- ============================================
--- TABLE: assignation_vehicule
--- Assignation d'un véhicule à un regroupement
--- ============================================
-CREATE TABLE assignation_vehicule (
-    id SERIAL PRIMARY KEY,
-    id_vehicule INT NOT NULL,
-    id_regroupement INT NOT NULL,
-    date_heure_assignation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    date_heure_depart TIMESTAMP,
-    date_heure_retour TIMESTAMP,
-    kilometrage_debut DECIMAL(10, 2),
-    kilometrage_fin DECIMAL(10, 2),
-    statut VARCHAR(30) DEFAULT 'ASSIGNEE' CHECK (statut IN ('ASSIGNEE', 'EN_ROUTE', 'TERMINEE', 'ANNULEE')),
-    FOREIGN KEY (id_vehicule) REFERENCES vehicule(id),
-    FOREIGN KEY (id_regroupement) REFERENCES regroupement(id)
-);
-
--- ============================================
--- TABLE: parametre
--- Paramètres de configuration du système
--- ============================================
-CREATE TABLE parametre (
-    id SERIAL PRIMARY KEY,
-    cle VARCHAR(50) NOT NULL UNIQUE,
-    valeur VARCHAR(255) NOT NULL,
-    description TEXT,
-    date_modification TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ============================================
--- INSERTIONS DE DONNÉES DE BASE
--- ============================================
 
 -- Types de carburant
-INSERT INTO type_carburant (libelle, cout_par_litre) VALUES
-('Essence', 4500.00),
-('Diesel', 4200.00),
-('Electrique', 0.00),
-('Hybride', 4500.00);
+CREATE TABLE IF NOT EXISTS types_carburant (
+    id SERIAL PRIMARY KEY,
+    nom TEXT NOT NULL UNIQUE
+);
 
--- Paramètres système
-INSERT INTO parametre (cle, valeur, description) VALUES
-('VITESSE_MOYENNE_KMH', '20', 'Vitesse moyenne de circulation en km/h'),
-('TEMPS_ATTENTE_MIN', '15', 'Temps d''attente moyen en minutes à l''aéroport'),
-('MARGE_REGROUPEMENT_MIN', '30', 'Marge de temps en minutes pour regrouper des réservations'),
-('DISTANCE_MAX_REGROUPEMENT_KM', '5', 'Distance maximale entre destinations pour regroupement');
+-- Hôtels
+CREATE TABLE IF NOT EXISTS hotels (
+    id SERIAL PRIMARY KEY,
+    nom TEXT NOT NULL,
+    adresse TEXT,
+    telephone TEXT,
+    email TEXT,
+    cree_le TIMESTAMP DEFAULT LOCALTIMESTAMP
+);
 
--- Destinations exemples
-INSERT INTO destination (nom, adresse, distance_aeroport_km) VALUES
-('Hotel Carlton', 'Anosy, Antananarivo', 18.5),
-('Hotel Colbert', 'Analakely, Antananarivo', 17.0),
-('Hotel Ibis', 'Ankorondrano, Antananarivo', 12.0),
-('Hotel Radisson', 'Ambodivona, Antananarivo', 15.0),
-('Centre-ville Analakely', 'Analakely, Antananarivo', 17.5);
+-- Véhicules
+CREATE TABLE IF NOT EXISTS vehicules (
+    id SERIAL PRIMARY KEY,
+    immatriculation TEXT UNIQUE,
+    nom TEXT,
+    marque TEXT,
+    modele TEXT,
+    annee SMALLINT,
+    places SMALLINT NOT NULL CHECK (places > 0),
+    type_carburant_id INT REFERENCES types_carburant(id) ON DELETE SET NULL,
+    kilometrage BIGINT NOT NULL DEFAULT 0,
+    statut TEXT NOT NULL DEFAULT 'disponible' REFERENCES statuts_vehicule(nom),
+    cree_le TIMESTAMP DEFAULT LOCALTIMESTAMP,
+    modifie_le TIMESTAMP DEFAULT LOCALTIMESTAMP
+);
 
--- Véhicules exemples
-INSERT INTO vehicule (immatriculation, marque, modele, capacite, id_type_carburant, consommation_100km, est_disponible) VALUES
-('1234 TAN', 'Toyota', 'Hiace', 12, 2, 10.5, TRUE),
-('5678 TAN', 'Mercedes', 'Sprinter', 15, 2, 12.0, TRUE),
-('9012 TAN', 'Toyota', 'Corolla', 4, 1, 7.5, TRUE),
-('3456 TAN', 'Hyundai', 'H1', 8, 2, 9.0, TRUE),
-('7890 TAN', 'Toyota', 'Fortuner', 6, 2, 11.0, TRUE);
+CREATE INDEX IF NOT EXISTS idx_vehicules_statut ON vehicules(statut);
+CREATE INDEX IF NOT EXISTS idx_vehicules_type_carburant ON vehicules(type_carburant_id);
 
--- ============================================
--- VUES UTILES
--- ============================================
+-- Réservations
+CREATE TABLE IF NOT EXISTS reservations (
+    id SERIAL PRIMARY KEY,
+    client_id INT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    places_requises SMALLINT NOT NULL CHECK (places_requises > 0),
+    debut_ts TIMESTAMP NOT NULL DEFAULT LOCALTIMESTAMP,
+    fin_ts TIMESTAMP NOT NULL DEFAULT (LOCALTIMESTAMP + INTERVAL '1 hour'),
+    hotel_depart_id INT REFERENCES hotels(id) ON DELETE SET NULL,
+    hotel_arrivee_id INT REFERENCES hotels(id) ON DELETE SET NULL,
+    type_reservation TEXT NOT NULL DEFAULT 'transfert' REFERENCES types_reservation(nom),
+    statut TEXT NOT NULL DEFAULT 'en_attente' REFERENCES statuts_reservation(nom),
+    cree_le TIMESTAMP DEFAULT LOCALTIMESTAMP,
+    CHECK (fin_ts > debut_ts)
+);
 
--- Vue des réservations en attente avec détails
-CREATE OR REPLACE VIEW v_reservations_en_attente AS
-SELECT 
-    r.id,
-    r.reference,
-    c.nom || ' ' || c.prenom AS client,
-    c.telephone,
-    v.numero_vol,
-    v.date_heure_arrivee,
-    d.nom AS destination,
-    d.distance_aeroport_km,
-    r.nombre_passagers,
-    r.date_heure_souhaitee,
-    r.statut
-FROM reservation r
-JOIN client c ON r.id_client = c.id
-LEFT JOIN vol v ON r.id_vol = v.id
-JOIN destination d ON r.id_destination = d.id
-WHERE r.statut = 'EN_ATTENTE'
-ORDER BY r.date_heure_souhaitee;
+CREATE INDEX IF NOT EXISTS idx_reservations_start_end ON reservations(debut_ts, fin_ts);
+CREATE INDEX IF NOT EXISTS idx_reservations_client ON reservations(client_id);
 
--- Vue des véhicules disponibles avec capacité
-CREATE OR REPLACE VIEW v_vehicules_disponibles AS
-SELECT 
-    v.id,
-    v.immatriculation,
-    v.marque || ' ' || v.modele AS vehicule,
-    v.capacite,
-    tc.libelle AS type_carburant,
-    v.consommation_100km
-FROM vehicule v
-JOIN type_carburant tc ON v.id_type_carburant = tc.id
-WHERE v.est_disponible = TRUE
-ORDER BY v.capacite DESC;
+-- Regroupement des réservations (pour optimisation de trajets)
+CREATE TABLE IF NOT EXISTS groupes_reservations (
+    id SERIAL PRIMARY KEY,
+    nom TEXT,
+    cree_le TIMESTAMP DEFAULT LOCALTIMESTAMP
+);
 
--- ============================================
--- INDEX POUR OPTIMISATION
--- ============================================
-CREATE INDEX idx_reservation_statut ON reservation(statut);
-CREATE INDEX idx_reservation_date ON reservation(date_heure_souhaitee);
-CREATE INDEX idx_vehicule_disponible ON vehicule(est_disponible);
-CREATE INDEX idx_vol_date ON vol(date_heure_arrivee);
-CREATE INDEX idx_assignation_statut ON assignation_vehicule(statut);
+CREATE TABLE IF NOT EXISTS membres_groupes_reservations (
+    groupe_id INT NOT NULL REFERENCES groupes_reservations(id) ON DELETE CASCADE,
+    reservation_id INT NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
+    PRIMARY KEY (groupe_id, reservation_id)
+);
 
--- ============================================
--- FIN DU SCRIPT
--- ============================================
+-- Affectations véhicules <-> réservations
+-- On utilise une colonne 'trajet' (tsrange) construite à partir de 'debut_trajet'/'fin_trajet' (timestamp local) pour protéger contre chevauchements via une contrainte EXCLUDE
+CREATE TABLE IF NOT EXISTS affectations_vehicules (
+    id SERIAL PRIMARY KEY,
+    reservation_id INT NOT NULL UNIQUE REFERENCES reservations(id) ON DELETE CASCADE,
+    vehicule_id INT NOT NULL REFERENCES vehicules(id) ON DELETE RESTRICT,
+    attribue_par TEXT,
+    attribue_le TIMESTAMP DEFAULT LOCALTIMESTAMP,
+    statut TEXT NOT NULL DEFAULT 'attribue' REFERENCES statuts_affectation(nom),
+    debut_trajet TIMESTAMP NOT NULL DEFAULT LOCALTIMESTAMP,
+    fin_trajet TIMESTAMP NOT NULL DEFAULT (LOCALTIMESTAMP + INTERVAL '1 hour'),
+    CHECK (fin_trajet > debut_trajet),
+    cree_le TIMESTAMP DEFAULT LOCALTIMESTAMP
+);
+
+
+-- Paramètres globaux (clé/valeur)
+CREATE TABLE IF NOT EXISTS parametres (
+    cle TEXT PRIMARY KEY,
+    valeur  VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
+-- Exemple de paramètres par défaut
+INSERT INTO parametres(cle, valeur, description)
+VALUES
+('vitesse_vehicule_kmh', '20', 'Vitesse de référence en km/h'),
+('temps_attente_minutes', '30', 'Temps d attente par défaut en minutes')
+ON CONFLICT (cle) DO NOTHING;
+
