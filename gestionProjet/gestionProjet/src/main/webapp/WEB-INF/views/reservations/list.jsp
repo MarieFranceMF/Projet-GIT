@@ -270,55 +270,33 @@
                                 <th>ID</th>
                                 <th>Client</th>
                                 <th>Places</th>
-                                <th>Début</th>
-                                <th>Fin</th>
-                                <th>Hôtel Départ</th>
-                                <th>Hôtel Arrivée</th>
-                                <th>Type</th>
-                                <th>Statut</th>
+                                <th>Date & Heure Arrivée</th>
+                                <th>Hôtel</th>
+                                <th>Créé le</th>
                             </tr>
                         </thead>
                         <tbody>
                             <c:forEach items="${reservations}" var="reservation">
                                 <tr>
                                     <td><strong>#${reservation.id}</strong></td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${not empty reservation.nomClient}">
-                                                ${reservation.nomClient}
-                                            </c:when>
-                                            <c:otherwise>
-                                                Client #${reservation.clientId}
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
+                                    <td><span class="client-id">${reservation.clientId}</span></td>
                                     <td>${reservation.placesRequises} 👥</td>
-                                    <td>${reservation.debutTs}</td>
-                                    <td>${reservation.finTs}</td>
+                                    <td>
+                                        <fmt:parseDate value="${reservation.dateheureArrive}" pattern="yyyy-MM-dd HH:mm:ss.S" var="parsedDate" />
+                                        <fmt:formatDate value="${parsedDate}" pattern="dd/MM/yyyy 'à' HH:mm" />
+                                    </td>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${not empty reservation.hotelDepartNom}">
-                                                ${reservation.hotelDepartNom}
-                                            </c:when>
-                                            <c:when test="${not empty reservation.hotelDepartId}">
-                                                Hôtel #${reservation.hotelDepartId}
+                                            <c:when test="${not empty reservation.hotel}">
+                                                ${reservation.hotel.nom}
                                             </c:when>
                                             <c:otherwise>-</c:otherwise>
                                         </c:choose>
                                     </td>
                                     <td>
-                                        <c:choose>
-                                            <c:when test="${not empty reservation.hotelArriveeNom}">
-                                                ${reservation.hotelArriveeNom}
-                                            </c:when>
-                                            <c:when test="${not empty reservation.hotelArriveeId}">
-                                                Hôtel #${reservation.hotelArriveeId}
-                                            </c:when>
-                                            <c:otherwise>-</c:otherwise>
-                                        </c:choose>
+                                        <fmt:parseDate value="${reservation.creeLe}" pattern="yyyy-MM-dd HH:mm:ss.S" var="parsedCreeLe" />
+                                        <fmt:formatDate value="${parsedCreeLe}" pattern="dd/MM/yyyy HH:mm" />
                                     </td>
-                                    <td><span class="badge-type">${reservation.typeReservation}</span></td>
-                                    <td><span class="badge-statut badge-${reservation.statut}">${reservation.statut}</span></td>
                                 </tr>
                             </c:forEach>
                         </tbody>

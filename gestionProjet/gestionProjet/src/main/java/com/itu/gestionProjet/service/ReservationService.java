@@ -1,10 +1,10 @@
 package com.itu.gestionProjet.service;
 
+import com.itu.gestionProjet.model.ApiResponse;
 import com.itu.gestionProjet.model.Reservation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,6 +22,13 @@ public class ReservationService {
 
     public ReservationService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+        // Ajouter le support pour text/plain avec JSON
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(List.of(
+            org.springframework.http.MediaType.APPLICATION_JSON,
+            org.springframework.http.MediaType.TEXT_PLAIN
+        ));
+        restTemplate.getMessageConverters().add(0, converter);
     }
 
     /**
@@ -30,15 +37,19 @@ public class ReservationService {
     public List<Reservation> getAllReservations() {
         try {
             String url = backofficeApiUrl + "/reservations";
-            ResponseEntity<List<Reservation>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Reservation>>() {}
-            );
-            return response.getBody() != null ? response.getBody() : Collections.emptyList();
+            ResponseEntity<ApiResponse> response = restTemplate.getForEntity(url, ApiResponse.class);
+            
+            ApiResponse apiResponse = response.getBody();
+            if (apiResponse != null && "success".equals(apiResponse.getStatus()) 
+                    && apiResponse.getData() != null 
+                    && apiResponse.getData().getModel() != null) {
+                List<Reservation> reservations = apiResponse.getData().getModel().getReservations();
+                return reservations != null ? reservations : Collections.emptyList();
+            }
+            return Collections.emptyList();
         } catch (Exception e) {
             System.err.println("Erreur lors de l'appel API: " + e.getMessage());
+            e.printStackTrace();
             return Collections.emptyList();
         }
     }
@@ -49,15 +60,19 @@ public class ReservationService {
     public List<Reservation> searchByDate(LocalDate date) {
         try {
             String url = backofficeApiUrl + "/reservations/search?date=" + date.toString();
-            ResponseEntity<List<Reservation>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Reservation>>() {}
-            );
-            return response.getBody() != null ? response.getBody() : Collections.emptyList();
+            ResponseEntity<ApiResponse> response = restTemplate.getForEntity(url, ApiResponse.class);
+            
+            ApiResponse apiResponse = response.getBody();
+            if (apiResponse != null && "success".equals(apiResponse.getStatus()) 
+                    && apiResponse.getData() != null 
+                    && apiResponse.getData().getModel() != null) {
+                List<Reservation> reservations = apiResponse.getData().getModel().getReservations();
+                return reservations != null ? reservations : Collections.emptyList();
+            }
+            return Collections.emptyList();
         } catch (Exception e) {
             System.err.println("Erreur lors de la recherche par date: " + e.getMessage());
+            e.printStackTrace();
             return Collections.emptyList();
         }
     }
@@ -68,9 +83,21 @@ public class ReservationService {
     public Reservation getReservationById(Long id) {
         try {
             String url = backofficeApiUrl + "/reservations/" + id;
-            return restTemplate.getForObject(url, Reservation.class);
+            ResponseEntity<ApiResponse> response = restTemplate.getForEntity(url, ApiResponse.class);
+            
+            ApiResponse apiResponse = response.getBody();
+            if (apiResponse != null && "success".equals(apiResponse.getStatus()) 
+                    && apiResponse.getData() != null 
+                    && apiResponse.getData().getModel() != null) {
+                List<Reservation> reservations = apiResponse.getData().getModel().getReservations();
+                if (reservations != null && !reservations.isEmpty()) {
+                    return reservations.get(0);
+                }
+            }
+            return null;
         } catch (Exception e) {
             System.err.println("Erreur lors de la récupération de la réservation: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }

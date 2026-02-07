@@ -1,24 +1,29 @@
 package com.itu.gestionProjet.model;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Modèle correspondant à la structure JSON de l'API back-office:
+ * {
+ *   "id": 1,
+ *   "clientId": "001",
+ *   "placesRequises": 2,
+ *   "dateheureArrive": "2026-02-06 16:21:00.0",
+ *   "hotel": { "id": 1, "nom": "Hotel de la Plage" },
+ *   "creeLe": "2026-02-06 16:21:13.177"
+ * }
+ */
 public class Reservation {
     
     private Long id;
-    private Long clientId;
+    private String clientId;
     private Integer placesRequises;
-    private LocalDateTime debutTs;
-    private LocalDateTime finTs;
-    private Long hotelDepartId;
-    private Long hotelArriveeId;
-    private String typeReservation;
-    private String statut;
-    private LocalDateTime creeLe;
     
-    // Informations supplémentaires (si retournées par l'API avec jointures)
-    private String nomClient;
-    private String hotelDepartNom;
-    private String hotelArriveeNom;
+    @JsonProperty("dateheureArrive")
+    private String dateheureArrive;
+    
+    private Hotel hotel;
+    private String creeLe;
 
     public Reservation() {
     }
@@ -32,11 +37,11 @@ public class Reservation {
         this.id = id;
     }
 
-    public Long getClientId() {
+    public String getClientId() {
         return clientId;
     }
 
-    public void setClientId(Long clientId) {
+    public void setClientId(String clientId) {
         this.clientId = clientId;
     }
 
@@ -48,83 +53,27 @@ public class Reservation {
         this.placesRequises = placesRequises;
     }
 
-    public LocalDateTime getDebutTs() {
-        return debutTs;
+    public String getDateheureArrive() {
+        return dateheureArrive;
     }
 
-    public void setDebutTs(LocalDateTime debutTs) {
-        this.debutTs = debutTs;
+    public void setDateheureArrive(String dateheureArrive) {
+        this.dateheureArrive = dateheureArrive;
     }
 
-    public LocalDateTime getFinTs() {
-        return finTs;
+    public Hotel getHotel() {
+        return hotel;
     }
 
-    public void setFinTs(LocalDateTime finTs) {
-        this.finTs = finTs;
+    public void setHotel(Hotel hotel) {
+        this.hotel = hotel;
     }
 
-    public Long getHotelDepartId() {
-        return hotelDepartId;
-    }
-
-    public void setHotelDepartId(Long hotelDepartId) {
-        this.hotelDepartId = hotelDepartId;
-    }
-
-    public Long getHotelArriveeId() {
-        return hotelArriveeId;
-    }
-
-    public void setHotelArriveeId(Long hotelArriveeId) {
-        this.hotelArriveeId = hotelArriveeId;
-    }
-
-    public String getTypeReservation() {
-        return typeReservation;
-    }
-
-    public void setTypeReservation(String typeReservation) {
-        this.typeReservation = typeReservation;
-    }
-
-    public String getStatut() {
-        return statut;
-    }
-
-    public void setStatut(String statut) {
-        this.statut = statut;
-    }
-
-    public LocalDateTime getCreeLe() {
+    public String getCreeLe() {
         return creeLe;
     }
 
-    public void setCreeLe(LocalDateTime creeLe) {
+    public void setCreeLe(String creeLe) {
         this.creeLe = creeLe;
-    }
-
-    public String getNomClient() {
-        return nomClient;
-    }
-
-    public void setNomClient(String nomClient) {
-        this.nomClient = nomClient;
-    }
-
-    public String getHotelDepartNom() {
-        return hotelDepartNom;
-    }
-
-    public void setHotelDepartNom(String hotelDepartNom) {
-        this.hotelDepartNom = hotelDepartNom;
-    }
-
-    public String getHotelArriveeNom() {
-        return hotelArriveeNom;
-    }
-
-    public void setHotelArriveeNom(String hotelArriveeNom) {
-        this.hotelArriveeNom = hotelArriveeNom;
     }
 }
