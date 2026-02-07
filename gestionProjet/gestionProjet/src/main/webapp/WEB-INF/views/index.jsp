@@ -71,10 +71,14 @@
         <p class="message">${message}</p>
         <p class="date">Date: ${date}</p>
         
-        <a href="/test" class="btn">Page de Test</a>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <a href="${pageContext.request.contextPath}/reservations" class="btn">📋 Liste des Réservations</a>
+            <a href="${pageContext.request.contextPath}/test" class="btn" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">🧪 Page de Test</a>
+        </div>
         
         <div class="status">
-            ✅ L'application Front Office est opérationnelle!
+            ✅ L'application Front Office est opérationnelle!<br>
+            <small style="color: #666;">API Back-Office: ${apiUrl}</small>
         </div>
     </div>
 </body>
