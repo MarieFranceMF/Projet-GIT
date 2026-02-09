@@ -57,14 +57,14 @@
             font-weight: 500;
             color: #555;
         }
-        .search-form input[type="date"] {
+        .search-form input[type="datetime-local"] {
             padding: 10px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1em;
             transition: border-color 0.3s;
         }
-        .search-form input[type="date"]:focus {
+        .search-form input[type="datetime-local"]:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -212,14 +212,16 @@
     </div>
     
     <div class="container">
-        <!-- Formulaire de recherche par date -->
+        <!-- Formulaire de recherche par plage de dates -->
         <div class="search-box">
-            <h3>🔍 Rechercher par date d'arrivée</h3>
+            <h3>🔍 Rechercher par plage de dates</h3>
             <form class="search-form" action="${pageContext.request.contextPath}/reservations" method="get">
-                <label for="date">Date :</label>
-                <input type="date" id="date" name="date" value="${searchDate}">
+                <label for="start">Du :</label>
+                <input type="datetime-local" id="start" name="start" value="${startValue}">
+                <label for="end">Au :</label>
+                <input type="datetime-local" id="end" name="end" value="${endValue}">
                 <button type="submit" class="btn btn-primary">Rechercher</button>
-                <c:if test="${not empty searchDate}">
+                <c:if test="${not empty startValue || not empty endValue}">
                     <a href="${pageContext.request.contextPath}/reservations" class="btn btn-secondary">Réinitialiser</a>
                 </c:if>
             </form>
@@ -235,7 +237,13 @@
         <!-- Info recherche -->
         <c:if test="${searchPerformed}">
             <div class="alert alert-info">
-                📅 Résultats pour la date : <strong>${searchDate}</strong>
+                📅 Résultats pour la période :
+                <c:if test="${not empty startValue}">
+                    du <strong>${startValue}</strong>
+                </c:if>
+                <c:if test="${not empty endValue}">
+                    au <strong>${endValue}</strong>
+                </c:if>
             </div>
         </c:if>
         
