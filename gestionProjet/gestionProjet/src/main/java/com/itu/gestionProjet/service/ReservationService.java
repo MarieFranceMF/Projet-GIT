@@ -7,8 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDate;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,18 +27,40 @@ public class ReservationService {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setSupportedMediaTypes(List.of(
             org.springframework.http.MediaType.APPLICATION_JSON,
-            org.springframework.http.MediaType.TEXT_PLAIN
+            org.springframework.http.MediaType.TEXT_PLAIN,
+            org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
         ));
         restTemplate.getMessageConverters().add(0, converter);
     }
 
     /**
-     * Récupère toutes les réservations depuis l'API du back-office
+     * Récupère toutes les réservations depuis l'API du back-office (sans filtre de date)
      */
     public List<Reservation> getAllReservations() {
+        return listByDateRange(null, null);
+    }
+
+    /**
+     * Récupère les réservations entre deux dates (Timestamp) depuis l'API du back-office.
+     * Si start et end sont null, récupère toutes les réservations.
+     *
+     * @param start date de début au format "yyyy-MM-dd HH:mm:ss" (peut être null)
+     * @param end   date de fin au format "yyyy-MM-dd HH:mm:ss" (peut être null)
+     * @return liste des réservations correspondantes
+     */
+    public List<Reservation> listByDateRange(String start, String end) {
         try {
-            String url = backofficeApiUrl + "/reservations";
-            ResponseEntity<ApiResponse> response = restTemplate.getForEntity(url, ApiResponse.class);
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(backofficeApiUrl + "/reservations");
+            if (start != null && !start.isEmpty()) {
+                builder.queryParam("start", start);
+            }
+            if (end != null && !end.isEmpty()) {
+                builder.queryParam("end", end);
+            }
+            URI uri = builder.build().toUri();
+            System.out.println("Appel API back-office: " + uri);
+
+            ResponseEntity<ApiResponse> response = restTemplate.getForEntity(uri, ApiResponse.class);
             
             ApiResponse apiResponse = response.getBody();
             if (apiResponse != null && "success".equals(apiResponse.getStatus()) 
@@ -49,29 +72,6 @@ public class ReservationService {
             return Collections.emptyList();
         } catch (Exception e) {
             System.err.println("Erreur lors de l'appel API: " + e.getMessage());
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Recherche les réservations par date depuis l'API du back-office
-     */
-    public List<Reservation> searchByDate(LocalDate date) {
-        try {
-            String url = backofficeApiUrl + "/reservations/search?date=" + date.toString();
-            ResponseEntity<ApiResponse> response = restTemplate.getForEntity(url, ApiResponse.class);
-            
-            ApiResponse apiResponse = response.getBody();
-            if (apiResponse != null && "success".equals(apiResponse.getStatus()) 
-                    && apiResponse.getData() != null 
-                    && apiResponse.getData().getModel() != null) {
-                List<Reservation> reservations = apiResponse.getData().getModel().getReservations();
-                return reservations != null ? reservations : Collections.emptyList();
-            }
-            return Collections.emptyList();
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la recherche par date: " + e.getMessage());
             e.printStackTrace();
             return Collections.emptyList();
         }

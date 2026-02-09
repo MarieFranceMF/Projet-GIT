@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
@@ -17,39 +18,58 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private static final DateTimeFormatter TIMESTAMP_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
     /**
-     * Affiche la liste des réservations avec possibilité de recherche par date
+     * Affiche la liste des réservations avec possibilité de recherche par plage de dates (Timestamp)
+     * Les paramètres start et end sont au format "yyyy-MM-ddTHH:mm" (datetime-local HTML5)
      */
     @GetMapping
     public String listReservations(
-            @RequestParam(value = "date", required = false) String dateStr,
+            @RequestParam(value = "start", required = false) String startStr,
+            @RequestParam(value = "end", required = false) String endStr,
             Model model) {
         
         List<Reservation> reservations;
-        String searchDate = null;
         String errorMessage = null;
+        String startValue = startStr != null ? startStr : "";
+        String endValue = endStr != null ? endStr : "";
+        boolean searchPerformed = false;
         
-        if (dateStr != null && !dateStr.isEmpty()) {
+        // Convertir les valeurs datetime-local (yyyy-MM-ddTHH:mm) en Timestamp (yyyy-MM-dd HH:mm:ss)
+        String startTimestamp = null;
+        String endTimestamp = null;
+        
+        if ((startStr != null && !startStr.isEmpty()) || (endStr != null && !endStr.isEmpty())) {
             try {
-                LocalDate date = LocalDate.parse(dateStr);
-                reservations = reservationService.searchByDate(date);
-                searchDate = dateStr;
-                model.addAttribute("searchPerformed", true);
+                if (startStr != null && !startStr.isEmpty()) {
+                    LocalDateTime startDt = LocalDateTime.parse(startStr);
+                    startTimestamp = startDt.format(TIMESTAMP_FMT);
+                }
+                if (endStr != null && !endStr.isEmpty()) {
+                    LocalDateTime endDt = LocalDateTime.parse(endStr);
+                    endTimestamp = endDt.format(TIMESTAMP_FMT);
+                }
+                searchPerformed = true;
             } catch (DateTimeParseException e) {
-                errorMessage = "Format de date invalide. Utilisez le format YYYY-MM-DD";
-                reservations = reservationService.getAllReservations();
+                errorMessage = "Format de date invalide. Utilisez le sélecteur de date.";
             }
+        }
+        
+        if (errorMessage == null) {
+            reservations = reservationService.listByDateRange(startTimestamp, endTimestamp);
         } else {
             reservations = reservationService.getAllReservations();
         }
         
         model.addAttribute("reservations", reservations);
-        model.addAttribute("searchDate", searchDate);
+        model.addAttribute("startValue", startValue);
+        model.addAttribute("endValue", endValue);
+        model.addAttribute("searchPerformed", searchPerformed);
         model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("totalCount", reservations.size());
         
