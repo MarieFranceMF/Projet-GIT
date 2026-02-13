@@ -41,3 +41,8 @@ Vehicule(capacite, Type_carb), Parametre(vitesse moyenne (ex:20km/h), TA(Temps d
 Regroupement
 Assignation Voiture (supposena oe efa any amin aeroport dhl ny voiture rhtr)
 
+sprint2
+-Vehicule(id, ref, nbr places, type carburant =>D(diesel), H(hybride), ES(essence), EL(electrique))
+-CRUD Vehicule
+-Protegena ny appel anle api (mcrreer table Token(id, token, date d expiration)) ts asina interface fa manao main mremplir an io 
+ny appel api ts maints mandefa token amzay, mberfier oe misu v sa tsis le token, ra misy de refusena, ra misy ndray de verifiena ndray ny date oe exiperer va tsia ra tsia de acceptena, apetaka eo amin url ny token, ny back office no mipreparer anle token 
