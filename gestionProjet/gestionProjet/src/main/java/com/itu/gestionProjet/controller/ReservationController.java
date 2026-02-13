@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -61,9 +62,14 @@ public class ReservationController {
         }
         
         if (errorMessage == null) {
-            reservations = reservationService.listByDateRange(startTimestamp, endTimestamp);
+            try {
+                reservations = reservationService.listByDateRange(startTimestamp, endTimestamp);
+            } catch (RuntimeException e) {
+                errorMessage = e.getMessage();
+                reservations = Collections.emptyList();
+            }
         } else {
-            reservations = reservationService.getAllReservations();
+            reservations = Collections.emptyList();
         }
         
         model.addAttribute("reservations", reservations);
