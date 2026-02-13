@@ -45,4 +45,20 @@ sprint2
 -Vehicule(id, ref, nbr places, type carburant =>D(diesel), H(hybride), ES(essence), EL(electrique))
 -CRUD Vehicule
 -Protegena ny appel anle api (mcrreer table Token(id, token, date d expiration)) ts asina interface fa manao main mremplir an io 
-ny appel api ts maints mandefa token amzay, mberfier oe misu v sa tsis le token, ra misy de refusena, ra misy ndray de verifiena ndray ny date oe exiperer va tsia ra tsia de acceptena, apetaka eo amin url ny token, ny back office no mipreparer anle token 
+ny appel api ts maints mandefa token amzay, mverfier oe misy v sa tsis le token, ra tsisy de refusena, ra misy ndray de verifiena ndray ny date oe exiperer va tsia ra tsia de acceptena, apetaka eo amin url ny token, ny back office no mipreparer anle token 
+
+Sprint3: assignation de reservation de vehicule 
+resaka parametre,ts a crud fa insertion:
+Vitesse Moyenne: km/h
+Temps d attente: minutes
+
+Table Hotel/Lieux: id, code, libelle (ex: 1, IRI, Irish)
+Table Distance: id, From, To , Kim (ex: 1, Ivato, Colbert, 20)
+
+Scenario angatahana: 
+BO: Manisy interface Mandray parametre date => page planifacation : liste vehicule miteny oe ti vehicule ti d ti ny reservation entiny + heure de depart aeroport et heure d arrivee aeroport
+----Regle de gestion----
+1-zay tombil manana place mitovitovy anle nbr de place anle reservation no assignena anle tombil
+2-zay tomobil akaiky indrindra no alaina
+3-fa ra misy mitovy ny nbr de places de ze diesel no assignena azy 
+4- sinon ra mitovy d atao random
