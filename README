@@ -47,6 +47,7 @@ sprint2
 -Protegena ny appel anle api (mcrreer table Token(id, token, date d expiration)) ts asina interface fa manao main mremplir an io 
 ny appel api ts maints mandefa token amzay, mverfier oe misy v sa tsis le token, ra tsisy de refusena, ra misy ndray de verifiena ndray ny date oe exiperer va tsia ra tsia de acceptena, apetaka eo amin url ny token, ny back office no mipreparer anle token 
 
+---------------------------------------------------------------------------
 Sprint3: assignation de reservation de vehicule 
 resaka parametre,ts a crud fa insertion:
 Vitesse Moyenne: km/h
@@ -62,3 +63,6 @@ BO: Manisy interface Mandray parametre date => page planifacation : liste vehicu
 2-zay tomobil akaiky indrindra no alaina
 3-fa ra misy mitovy ny nbr de places de ze diesel no assignena azy 
 4- sinon ra mitovy d atao random
+
+Inn no angatahana ? : 1- insetion param, distance, lieu
+                      2- Page anakiroa voalaza etsy ambony  
