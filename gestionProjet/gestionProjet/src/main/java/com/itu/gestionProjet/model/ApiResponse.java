@@ -75,6 +75,7 @@ public class ApiResponse {
         private List<Reservation> reservations;
         private String start;
         private String end;
+        private String error;
 
         public List<Reservation> getReservations() {
             return reservations;
@@ -98,6 +99,14 @@ public class ApiResponse {
 
         public void setEnd(String end) {
             this.end = end;
+        }
+
+        public String getError() {
+            return error;
+        }
+
+        public void setError(String error) {
+            this.error = error;
         }
     }
 }

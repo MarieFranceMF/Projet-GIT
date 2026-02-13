@@ -21,6 +21,9 @@ public class ReservationService {
     @Value("${backoffice.api.url}")
     private String backofficeApiUrl;
 
+    @Value("${backoffice.api.token}")
+    private String backofficeApiToken;
+
     public ReservationService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
         // Ajouter le support pour text/plain avec JSON
@@ -51,6 +54,7 @@ public class ReservationService {
     public List<Reservation> listByDateRange(String start, String end) {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(backofficeApiUrl + "/reservations");
+            builder.queryParam("token", backofficeApiToken);
             if (start != null && !start.isEmpty()) {
                 builder.queryParam("start", start);
             }
@@ -66,14 +70,21 @@ public class ReservationService {
             if (apiResponse != null && "success".equals(apiResponse.getStatus()) 
                     && apiResponse.getData() != null 
                     && apiResponse.getData().getModel() != null) {
+                // Vérifier si le back-office a renvoyé une erreur (ex: token invalide)
+                String error = apiResponse.getData().getModel().getError();
+                if (error != null && !error.isEmpty()) {
+                    throw new RuntimeException(error);
+                }
                 List<Reservation> reservations = apiResponse.getData().getModel().getReservations();
                 return reservations != null ? reservations : Collections.emptyList();
             }
             return Collections.emptyList();
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             System.err.println("Erreur lors de l'appel API: " + e.getMessage());
             e.printStackTrace();
-            return Collections.emptyList();
+            throw new RuntimeException("Impossible de contacter le back-office: " + e.getMessage());
         }
     }
 
@@ -82,8 +93,10 @@ public class ReservationService {
      */
     public Reservation getReservationById(Long id) {
         try {
-            String url = backofficeApiUrl + "/reservations/" + id;
-            ResponseEntity<ApiResponse> response = restTemplate.getForEntity(url, ApiResponse.class);
+            URI uri = UriComponentsBuilder.fromHttpUrl(backofficeApiUrl + "/reservations/" + id)
+                    .queryParam("token", backofficeApiToken)
+                    .build().toUri();
+            ResponseEntity<ApiResponse> response = restTemplate.getForEntity(uri, ApiResponse.class);
             
             ApiResponse apiResponse = response.getBody();
             if (apiResponse != null && "success".equals(apiResponse.getStatus()) 
