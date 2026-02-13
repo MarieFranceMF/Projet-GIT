@@ -64,5 +64,6 @@ BO: Manisy interface Mandray parametre date => page planifacation : liste vehicu
 3-fa ra misy mitovy ny nbr de places de ze diesel no assignena azy 
 4- sinon ra mitovy d atao random
 
-Inn no angatahana ? : 1- insetion param, distance, lieu
-                      2- Page anakiroa voalaza etsy ambony  
+Inn no angatahana ? : 1- insertion param, distance, lieu
+                      2- Page anakiroa voalaza etsy ambony  + liste reservation non assignees a des voitures
+                      3- Pour l instant 1 vehicule pour 1 seul Hotel
