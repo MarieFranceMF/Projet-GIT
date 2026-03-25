@@ -67,3 +67,19 @@ BO: Manisy interface Mandray parametre date => page planifacation : liste vehicu
 Inn no angatahana ? : 1- insertion param, distance, lieu
                       2- Page anakiroa voalaza etsy ambony  + liste reservation non assignees a des voitures
                       3- Pour l instant 1 vehicule pour 1 seul Hotel
+
+
+SPRINT 5: Temps d attente = Regroupement reservation
+manampy isa anaty reservation, miampy ny vol posible, 
+Ex ohtr 8h ny temps d attente, de 30min te,ps d attente, zany oe 8h a 8h30 ze vol jusqu a 8h30 atambatra ray, 
+ra ohtr 8h15 by depart 
+***
+Liste trajet
+Pour un trajet: heure depart, vehicule, liste reservation, kilometrage parcouru, heure de retour
+ordonnena par ordre desecendant ny liste des resevations par rapport amin nbr de place, c a dire du plus grand au plus petit, 
+ra misy vol zany ohtr am 8h d ny temps d attente 30min, de ze reservation rehetre anatin io dia listena par nbr de place de atao amzay ny algo oe, jerena ohtr reservation voalohany 13pers d mitady tombil conforme amin iny, ohtr oe voiture 20 places, zany oe mbola misy 7 places dispo zany de mitady ndray reservation hafa mety mifanarka kokoa amin iny 7 places ambin iny fa ts votery oe le reservations manaraka et ainsi de suite, Fa ra ohtr kosa tsis tombil mifanaraka amle reservation de tod atao ftsn oe non assignée 
+
+Sprint 8
+-ra vo misy tombil tafaverina ka misy reservation non assigne de tod mandeha mitondra ze zakany 
+-ra ohtr ka 20 no zakan ilay tombil, ka ohtr oe 5 ny olona sisa, zany oe misy 15 reste, d miandry pedant anle temps d attente ra msiy vol anatin iny intervalle anle temps d attentes iny, d ra tsis de tod mandeha
+ref misy regrpmt vaovao d ra misy non assigne taloha de le non assigne no prioresena 
